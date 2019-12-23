@@ -1,0 +1,33 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558 
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "g++-8 build active file",
+            "command": "/usr/bin/g++-8",
+            "args": [
+                "-g",
+                "-v",
+                "${file}",
+                "-I/usr/local/modsecurity/include",
+                "-L",
+                "/usr/local/modsecurity/lib",
+                "-lmodsecurity",
+                "-lyajl",
+                "-DWITH_YAJL",
+                "-I/usr/include",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "/usr/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        }
+    ]
+}
