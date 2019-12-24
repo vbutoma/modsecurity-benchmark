@@ -3,17 +3,39 @@
 #include "modsecurity/modsecurity.h"
 #include "modsecurity/rules.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
 using modsecurity::Transaction;
 
 char ip[] = "127.0.0.1";
 char rules_file[] = "./configs/main.conf";
-unsigned char requestBody[] = "{\"a\": \"&&||1//*-+\", \"b\": 123 }";
+// unsigned char requestBody[] = "{\"a\": \"&&||1//*-+-+\", \"b\": 123 }";
+unsigned char requestBody[] = "{\"a\": \"1+1?1\", \"b\": \"&&||1//*-+-+\" }";
+std::string requestBodyString = "";
+
 
 int main( ) {
     std::cout << "hello" << std::endl;
     #ifdef WITH_YAJL
     std::cout << "YAJL DEFINED !!!" << std::endl;
     #endif
+    std::ifstream input ("data/2.json");
+    if (input.is_open()) {
+        std::string line;
+        while ( getline(input, line) ) {
+            // std::cout << line << '\n';
+            requestBodyString += line;
+        }
+        input.close();
+    } else std::cout << "Unable to open file" << std::endl; 
+    // std::cout << requestBodyString << std::endl;
+    unsigned char rb[requestBodyString.length() + 1];
+    std::copy(requestBodyString.data(), requestBodyString.data() + requestBodyString.length() + 1, rb);   
+    // std::cout << rb << std::endl;
+    // std::cout << requestBody << std::endl;;
+
     modsecurity::ModSecurity *modsec;
     modsecurity::Rules *rules;
     modsecurity::ModSecurityIntervention it;
@@ -43,11 +65,11 @@ int main( ) {
     if (modsecTransaction->intervention(&it)) {
         std::cout << "There is an intervention (Headers)" << std::endl;
     }
-    modsecTransaction->appendRequestBody(requestBody, strlen((const char*)requestBody));
+    modsecTransaction->appendRequestBody(rb, strlen((const char*)rb));
     modsecTransaction->processRequestBody();
-    if (modsecTransaction->intervention(&it)) {
-        std::cout << "There is an intervention (Body)" << std::endl;
-    }
+    // if (modsecTransaction->intervention(&it)) {
+    //     std::cout << "There is an intervention (Body)" << std::endl;
+    // }
     
     delete modsecTransaction;
     delete rules;
